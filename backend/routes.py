@@ -103,6 +103,9 @@ def update_friend(id):
         friend.description = data.get("description", friend.description)
         friend.gender = data.get("gender", friend.gender)
 
+        db.session.commit()
+        return jsonify({"msg": "Friend updated successfully", "data": f"{friend.to_json()}"}), 200
+
     except SQLAlchemyError as db_err:
         db.session.rollback()
         return jsonify({"Error": "Database error occurred.", "details": str(db_err)}), 500
