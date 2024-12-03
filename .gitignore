@@ -1,3 +1,4 @@
-backend/__pycache__/
 .venv
-backend/instance/
+
+# database
+backend/instance/friends.db

@@ -1,6 +1,7 @@
 from app import app, db
 from flask import request, jsonify
 from models import Friend
+from utils.validation import validate_friend_data
 from sqlalchemy.exc import SQLAlchemyError
 from flask_cors import cross_origin
 
@@ -15,10 +16,10 @@ def get_friends():
         return jsonify({"data": result})
 
     except SQLAlchemyError as db_err:
-        return jsonify({"Error": "Database error occurred while fetching friends.", "details": str(db_err)}), 500
+        return jsonify({"Error": "Database error occurred while fetching friends. {}".format(db_err)}), 500
 
     except Exception as e:
-        return jsonify({"Error": "An unexpected error occurred.", "details": str(e)}), 500
+        return jsonify({"Error": "An unexpected error occurred. {}".format(e)}), 500
 
 
 # Create a friend
@@ -28,13 +29,7 @@ def create_friend():
     avatar_base_url = "https://avatar.iran.liara.run/public"
     try:
         data = request.json  # Take request and convert to json
-        if not data:
-            return jsonify({"Error": "Invalid input data"}), 400
-
-        required_field = ["name", "role", "description", "gender"]
-        for field in required_field:
-            if field not in data:
-                return jsonify({"Error": f"Missing required fields: {field}"})
+        validate_friend_data(data)
 
         name = data.get('name')
         role = data.get('role')
@@ -55,14 +50,17 @@ def create_friend():
         db.session.add(new_friend)
         db.session.commit()
 
-        return jsonify({"msg": "Friend created successfully", "data": new_friend.to_json()}), 201
+        return jsonify({"message": "Friend created successfully", "data": new_friend.to_json()}), 201
+
+    except ValueError as e:
+        return jsonify({"Error": str(e)}), 400
 
     except SQLAlchemyError as db_err:
         db.session.rollback()
-        return jsonify({"Error": "Database error occurred.", "details": str(db_err)}), 500
+        return jsonify({"Error": f"(Database error occurred: {db_err}"}), 500
 
     except Exception as e:
-        return jsonify({"error": "An unexpected error occurred.", "details": str(e)}), 500
+        return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
 
 
 # Delete a friend
@@ -77,14 +75,14 @@ def delete_friend(id):
         db.session.delete(friend)
         db.session.commit()
 
-        return jsonify({"msg": "Friend deleted successfully"}), 200
+        return jsonify({"message": "Friend deleted successfully"}), 200
 
     except SQLAlchemyError as db_err:
         db.session.rollback()
-        return jsonify({"Error": "Database error occurred.", "details": str(db_err)}), 500
+        return jsonify({"Error": "Database error occurred. {}".format(db_err)}), 500
 
     except Exception as e:
-        return jsonify({"Error": "An unexpected error occurred.", "details": str(e)}), 500
+        return jsonify({"Error": "An unexpected error occurred. {}".format(e)}), 500
 
 
 # Update a friend
@@ -104,11 +102,16 @@ def update_friend(id):
         friend.gender = data.get("gender", friend.gender)
 
         db.session.commit()
-        return jsonify({"msg": "Friend updated successfully", "data": f"{friend.to_json()}"}), 200
+        return jsonify(
+            {
+                "message": "Friend updated successfully",
+                "data": friend.to_json()
+            }
+        ), 200
 
     except SQLAlchemyError as db_err:
         db.session.rollback()
-        return jsonify({"Error": "Database error occurred.", "details": str(db_err)}), 500
+        return jsonify({"Error": "Database error occurred: {}".format(db_err)}), 500
 
     except Exception as e:
-        return jsonify({"Error": "An unexpected error occurred.", "details": str(e)}), 500
+        return jsonify({"Error": "An unexpected error occurred: {}".format(e)}), 500

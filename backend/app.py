@@ -9,8 +9,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///friends.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
 import routes
+
 with app.app_context():
     db.create_all()
 

@@ -1,5 +1,6 @@
 from app import db
 
+
 class Friend(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -10,11 +11,10 @@ class Friend(db.Model):
 
     def to_json(self):
         return {
-            "id":self.id,
-            "name":self.name,
-            "role":self.role,
-            "description":self.description,
-            "gender":self.gender,
-            "imgUrl;":self.img_url,
+            "id": self.id,
+            "name": self.name,
+            "role": self.role,
+            "description": self.description,
+            "gender": self.gender,
+            "imgUrl": self.img_url,
         }
-

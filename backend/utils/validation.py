@@ -10,7 +10,7 @@ def validate_friend_data(data):
         value = data.get(field)
         if not value or not isinstance(value, str) or value.strip() == "":
             raise ValueError(
-                f"Field '{field}' is required and must be a non-empty string.")
+                f"Field {field} is required and must be a non-empty string.")
 
     if data.get("gender") not in ["male", "female"]:
         raise ValueError("Gender must be 'male' or 'female'.")
